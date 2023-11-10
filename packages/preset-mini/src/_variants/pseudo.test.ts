@@ -1,5 +1,6 @@
 import { expect, it } from 'vitest'
 import { createGenerator } from '@unocss/core'
+import { h } from '../_utils/index.js'
 import { variantPseudoClassesAndElements } from './pseudo'
 
 // https://github.com/unocss/unocss/issues/2713
@@ -87,6 +88,9 @@ it('before: and after: includes empty content for tailwind compat', async () => 
       variantPseudoClassesAndElements(),
     ],
     rules: [
+      [/^content-(.+)$/, ([, v]) => ({ content: h.bracket.cssvar(v) })],
+      ['content-empty', { content: '""' }],
+      ['content-none', { content: 'none' }],
       [/^foo-(\d)$/, ([_, a]) => ({ text: `foo-${a}` })],
     ],
   })
@@ -94,11 +98,13 @@ it('before: and after: includes empty content for tailwind compat', async () => 
   const result = await uno.generate([
     'before:foo-1',
     'after:foo-1',
+    'before:content-none',
   ])
 
   expect(result.matched)
     .toMatchInlineSnapshot(`
       Set {
+        "before:content-none",
         "before:foo-1",
         "after:foo-1",
       }
@@ -107,7 +113,8 @@ it('before: and after: includes empty content for tailwind compat', async () => 
   expect(result.css)
     .toMatchInlineSnapshot(`
       "/* layer: default */
-      .before\\\\:foo-1::before{text:foo-1;content:\\"\\";}
-      .after\\\\:foo-1::after{text:foo-1;content:\\"\\";}"
+      .before\\\\:content-none::before{content:\\"\\";content:none;}
+      .before\\\\:foo-1::before{content:\\"\\";text:foo-1;}
+      .after\\\\:foo-1::after{content:\\"\\";text:foo-1;}"
     `)
 })
