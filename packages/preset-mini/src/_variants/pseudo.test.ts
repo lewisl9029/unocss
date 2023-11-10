@@ -80,3 +80,34 @@ it('focus-visible:', async () => {
       .focus-visible\\\\:foo-1:focus-visible{text:foo-1;}"
     `)
 })
+
+it('before: and after: includes empty content for tailwind compat', async () => {
+  const uno = createGenerator({
+    variants: [
+      variantPseudoClassesAndElements(),
+    ],
+    rules: [
+      [/^foo-(\d)$/, ([_, a]) => ({ text: `foo-${a}` })],
+    ],
+  })
+
+  const result = await uno.generate([
+    'before:foo-1',
+    'after:foo-1',
+  ])
+
+  expect(result.matched)
+    .toMatchInlineSnapshot(`
+      Set {
+        "before:foo-1",
+        "after:foo-1",
+      }
+    `)
+
+  expect(result.css)
+    .toMatchInlineSnapshot(`
+      "/* layer: default */
+      .before\\\\:foo-1::before{text:foo-1;content:\\"\\";}
+      .after\\\\:foo-1::after{text:foo-1;content:\\"\\";}"
+    `)
+})

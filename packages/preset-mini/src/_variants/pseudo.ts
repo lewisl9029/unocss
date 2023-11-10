@@ -1,4 +1,4 @@
-import type { VariantObject } from '@unocss/core'
+import type { CSSEntries, VariantObject } from '@unocss/core'
 import { escapeRegExp, escapeSelector, warnOnce } from '@unocss/core'
 import type { PresetMiniOptions } from '..'
 import { getBracket, h, variantGetBracket } from '../_utils'
@@ -247,9 +247,14 @@ export function variantPseudoClassesAndElements(): VariantObject {
                   selector: `${input.selector}${pseudo}`,
                 }
 
+            const entries: CSSEntries = { '::before': true, '::after': true }[pseudo]
+              ? [...input.entries, ['content', '""']]
+              : input.entries
+
             return next({
               ...input,
               ...selectors,
+              entries,
               sort: index,
               noMerge: true,
             })
