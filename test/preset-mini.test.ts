@@ -250,25 +250,6 @@ describe('preset-mini', () => {
     expect(css).toBe('')
   })
 
-  it('group data variant', async () => {
-    const uno = createGenerator({
-      presets: [
-        presetMini(),
-      ],
-    })
-
-    const { css } = await uno.generate([
-      'group-data-[state=open]:rotate-180',
-      'group-data-[state=open]:text-black',
-      'data-[state=open]:text-red',
-      'group-hover:font-bold',
-    ].join(' '), {
-      preflights: false,
-    })
-
-    await expect(css).toMatchFileSnapshot('./assets/output/preset-mini-group-data.css')
-  })
-
   it('define breakpoints with other unit', async () => {
     const uno = createGenerator({
       presets: [
@@ -293,16 +274,16 @@ describe('preset-mini', () => {
     expect(css).toMatchInlineSnapshot(`
       "/* layer: default */
       @media (max-width: 999.9px){
-      .\\\\<xl\\\\:text-3xl{font-size:1.875rem;line-height:2.25rem;}
+      .\\<xl\\:text-3xl{font-size:1.875rem;line-height:2.25rem;}
       }
       @media (max-width: calc(64rem - 0.1px)){
-      .\\\\<lg\\\\:text-sm{font-size:0.875rem;line-height:1.25rem;}
+      .\\<lg\\:text-sm{font-size:0.875rem;line-height:1.25rem;}
       }
       @media (min-width: 48rem){
-      .md\\\\:text-xl{font-size:1.25rem;line-height:1.75rem;}
+      .md\\:text-xl{font-size:1.25rem;line-height:1.75rem;}
       }
       @media (min-width: 48rem) and (max-width: calc(64rem - 0.1px)){
-      .\\\\~md\\\\:text-base{font-size:1rem;line-height:1.5rem;}
+      .\\~md\\:text-base{font-size:1rem;line-height:1.5rem;}
       }"
     `)
   })
@@ -354,32 +335,89 @@ describe('preset-mini', () => {
       `)
   })
 
-  it('theme raw breakpoint', async () => {
+  it('override colors differently', async () => {
     const uno = createGenerator({
       presets: [
         presetMini(),
       ],
       theme: {
-        breakpoints: {
-          'sm': '640px',
-          'md': '768px',
-          'lg': '1024px',
-          'xl': '1280px',
-          '2xl': '1536px',
-          // @ts-expect-error fixme: types
-          'desktop': {
-            raw: '(min-height: 1px) and (min-width: 1px)',
+        colors: {
+          blue: {
+            400: 'rgb(0 0 400)',
+          },
+        },
+        textColor: {
+          blue: {
+            400: 'rgb(0 0 700)',
           },
         },
       },
     })
 
-    expect((await uno.generate('desktop:block', { preflights: false })).css)
+    expect((await uno.generate('bg-blue-400 text-blue-400', { preflights: false })).css)
       .toMatchInlineSnapshot(`
         "/* layer: default */
-        @media (min-height: 1px) and (min-width: 1px){
-        .desktop\\\\:block{display:block;}
-        }"
+        .bg-blue-400{--un-bg-opacity:1;background-color:rgb(0 0 400 / var(--un-bg-opacity));}
+        .text-blue-400{--un-text-opacity:1;color:rgb(0 0 700 / var(--un-text-opacity));}"
       `)
+  })
+
+  it('account custom color for shadow theme', async () => {
+    const uno = createGenerator({
+      presets: [
+        presetMini(),
+      ],
+      theme: {
+        colors: {
+          blackA7: 'hsla(0, 0%, 0%, 0.169)',
+        },
+      },
+    })
+
+    expect((await uno.generate('shadow-[0_2px_10px] shadow-blackA7', { preflights: false })).css)
+      .toMatchInlineSnapshot(`
+        "/* layer: default */
+        .shadow-\\[0_2px_10px\\]{--un-shadow:0 2px 10px var(--un-shadow-color);box-shadow:var(--un-ring-offset-shadow), var(--un-ring-shadow), var(--un-shadow);}
+        .shadow-blackA7{--un-shadow-opacity:0.169;--un-shadow-color:hsla(0, 0%, 0%, var(--un-shadow-opacity));}"
+      `)
+  })
+
+  it('support new color notation using css variables for compatibility', async () => {
+    const uno = createGenerator({
+      presets: [
+        presetMini(),
+      ],
+      theme: {
+        colors: {
+          primary: 'var(--base-primary, oklch(var(--primary) / <alpha-value>))',
+        },
+      },
+    })
+
+    expect((await uno.generate('bg-primary bg-opacity-50 text-primary text-opacity-50', { preflights: false })).css)
+      .toMatchInlineSnapshot(`
+      "/* layer: default */
+      .bg-primary{--un-bg-opacity:1;background-color:var(--base-primary, oklch(var(--primary) / var(--un-bg-opacity)));}
+      .bg-opacity-50{--un-bg-opacity:0.5;}
+      .text-primary{--un-text-opacity:1;color:var(--base-primary, oklch(var(--primary) / var(--un-text-opacity)));}
+      .text-opacity-50{--un-text-opacity:0.5;}"
+    `)
+
+    expect((await uno.generate('bg-primary/50 ring-5 ring-primary ring-opacity-50', { preflights: false })).css)
+      .toMatchInlineSnapshot(`
+    "/* layer: default */
+    .bg-primary\\/50{background-color:var(--base-primary, oklch(var(--primary) / 0.5));}
+    .ring-5{--un-ring-width:5px;--un-ring-offset-shadow:var(--un-ring-inset) 0 0 0 var(--un-ring-offset-width) var(--un-ring-offset-color);--un-ring-shadow:var(--un-ring-inset) 0 0 0 calc(var(--un-ring-width) + var(--un-ring-offset-width)) var(--un-ring-color);box-shadow:var(--un-ring-offset-shadow), var(--un-ring-shadow), var(--un-shadow);}
+    .ring-primary{--un-ring-opacity:1;--un-ring-color:var(--base-primary, oklch(var(--primary) / var(--un-ring-opacity)));}
+    .ring-opacity-50{--un-ring-opacity:0.5;}"
+  `)
+
+    expect((await uno.generate('border-5 border-primary border-opacity-50', { preflights: false })).css)
+      .toMatchInlineSnapshot(`
+    "/* layer: default */
+    .border-5{border-width:5px;}
+    .border-primary{--un-border-opacity:1;border-color:var(--base-primary, oklch(var(--primary) / var(--un-border-opacity)));}
+    .border-opacity-50{--un-border-opacity:0.5;}"
+  `)
   })
 })

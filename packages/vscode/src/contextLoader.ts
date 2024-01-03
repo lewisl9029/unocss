@@ -4,16 +4,18 @@ import type { UnocssPluginContext, UserConfig, UserConfigDefaults } from '@unocs
 import { notNull } from '@unocss/core'
 import { sourceObjectFields, sourcePluginFactory } from 'unconfig/presets'
 import presetUno from '@unocss/preset-uno'
+import type { ExtensionContext, StatusBarItem } from 'vscode'
 import { resolveOptions as resolveNuxtOptions } from '../../nuxt/src/options'
 import { createNanoEvents } from '../../core/src/utils/events'
 import { createContext, isCssId } from './integration'
 import { isSubdir } from './utils'
 import { log } from './log'
+import { registerAnnotations } from './annotation'
+import { registerAutoComplete } from './autocomplete'
+import { registerSelectionStyle } from './selectionStyle'
 
 export class ContextLoader {
-  public cwd: string
   public ready: Promise<void>
-  public defaultContext: UnocssPluginContext<UserConfig<any>>
   public contextsMap = new Map<string, UnocssPluginContext<UserConfig<any>> | null>()
   public configSources: string[] = []
 
@@ -31,14 +33,12 @@ export class ContextLoader {
     contextUnload: (context: UnocssPluginContext<UserConfig<any>>) => void
   }>()
 
-  constructor(cwd: string) {
-    this.cwd = cwd
-    this.defaultContext = createContext(this.defaultUnocssConfig)
-
+  constructor(
+    public cwd: string,
+    public ext: ExtensionContext,
+    public status: StatusBarItem,
+  ) {
     this.ready = this.reload()
-      .then(async () => {
-        await this.defaultContext.ready
-      })
   }
 
   isTarget(id: string) {
@@ -191,7 +191,7 @@ export class ContextLoader {
       log.appendLine(`🛠 New configuration loaded from\n${sources.map(s => `  - ${s}`).join('\n')}`)
       log.appendLine(`ℹ️ ${context.uno.config.presets.length} presets, ${context.uno.config.rulesSize} rules, ${context.uno.config.shortcuts.length} shortcuts, ${context.uno.config.variants.length} variants, ${context.uno.config.transformers?.length || 0} transformers loaded`)
 
-      if (!sources.some(i => i.match(/\buno(css)?\.config\./))) {
+      if (!sources.some(i => /\buno(css)?\.config\./.test(i))) {
         log.appendLine('💡 To have the best IDE experience, it\'s recommended to move UnoCSS configurations into a standalone `uno.config.ts` file at the root of your project.')
         log.appendLine('👉 Learn more at https://unocss.dev/guide/config-file')
       }
@@ -205,7 +205,10 @@ export class ContextLoader {
     this.fileContextCache.clear()
     this.events.emit('reload')
 
-    log.appendLine(`🗂️ All context: ${Array.from(this.contextsMap.keys()).join(', ')}`)
+    log.appendLine(`🗂️ Enabled context: ${Array.from(this.contextsMap.entries()).filter(i => i[1]).map(i => i[0]).join(', ') || '[none]'}`)
+
+    if (context)
+      this.registerEditorSupport()
 
     return context
   }
@@ -214,7 +217,7 @@ export class ContextLoader {
     if (!this.contextsMap.size)
       return undefined
 
-    if (file.match(/[\/](node_modules|dist|\.temp|\.cache)[\/]/g))
+    if (/[\/](node_modules|dist|\.temp|\.cache)[\/]/g.test(file))
       return undefined
 
     if (this.fileContextCache.has(file))
@@ -244,7 +247,15 @@ export class ContextLoader {
         return context
       }
     }
+  }
 
-    return this.defaultContext
+  private _isRegistered = false
+  registerEditorSupport() {
+    if (this._isRegistered)
+      return
+    registerAutoComplete(this, this.ext)
+    registerAnnotations(this, this.status, this.ext)
+    registerSelectionStyle(this, this.ext)
+    this._isRegistered = true
   }
 }

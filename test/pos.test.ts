@@ -7,6 +7,7 @@ import { getMatchedPositionsFromCode as match } from '@unocss/shared-common'
 import transformerVariantGroup from '@unocss/transformer-variant-group'
 import cssDirectives from '@unocss/transformer-directives'
 import extractorPug from '@unocss/extractor-pug'
+import { defaultIdeMatchExclude, defaultIdeMatchInclude } from '@unocss/shared-integration'
 
 describe('matched-positions', async () => {
   it('attributify', async () => {
@@ -23,27 +24,27 @@ describe('matched-positions', async () => {
           [
             13,
             14,
-            "[border=\\"b\\"]",
+            "[border="b"]",
           ],
           [
             15,
             20,
-            "[border=\\"gray4\\"]",
+            "[border="gray4"]",
           ],
           [
             21,
             22,
-            "[border=\\"2\\"]",
+            "[border="2"]",
           ],
           [
             23,
             37,
-            "[border=\\"[&_span]:white\\"]",
+            "[border="[&_span]:white"]",
           ],
           [
             46,
             65,
-            "[hover=\\"[&>span]:text-white\\"]",
+            "[hover="[&>span]:text-white"]",
           ],
           [
             67,
@@ -73,12 +74,12 @@ describe('matched-positions', async () => {
           [
             13,
             15,
-            "[border=\\"bb\\"]",
+            "[border="bb"]",
           ],
           [
             16,
             17,
-            "[border=\\"b\\"]",
+            "[border="b"]",
           ],
         ]
       `)
@@ -248,6 +249,115 @@ describe('matched-positions', async () => {
         ]
       `)
   })
+
+  it('with include and exclude', async () => {
+    const uno = createGenerator({
+      presets: [
+        presetUno(),
+      ],
+    })
+
+    const code = `
+<script setup>
+let transition = 'ease-in-out duration-300'
+</script>
+
+<template>
+  <div class="h-1 text-red" />
+</template>
+
+<style>
+.css { 
+  transform: translateX(0);
+  @apply: text-blue;
+  --uno:
+    text-purple;
+}
+</style>
+    `
+
+    expect(await match(uno, code))
+      .toMatchInlineSnapshot(`
+        [
+          [
+            20,
+            30,
+            "transition",
+          ],
+          [
+            34,
+            45,
+            "ease-in-out",
+          ],
+          [
+            46,
+            58,
+            "duration-300",
+          ],
+          [
+            96,
+            99,
+            "h-1",
+          ],
+          [
+            100,
+            108,
+            "text-red",
+          ],
+          [
+            144,
+            153,
+            "transform",
+          ],
+          [
+            180,
+            189,
+            "text-blue",
+          ],
+          [
+            204,
+            215,
+            "text-purple",
+          ],
+        ]
+      `)
+
+    expect(await match(uno, code, undefined, { includeRegex: defaultIdeMatchInclude, excludeRegex: defaultIdeMatchExclude }))
+      .toMatchInlineSnapshot(`
+        [
+          [
+            34,
+            45,
+            "ease-in-out",
+          ],
+          [
+            46,
+            58,
+            "duration-300",
+          ],
+          [
+            96,
+            99,
+            "h-1",
+          ],
+          [
+            100,
+            108,
+            "text-red",
+          ],
+          [
+            180,
+            189,
+            "text-blue",
+          ],
+          [
+            204,
+            215,
+            "text-purple",
+          ],
+        ]
+      `)
+  })
 })
 
 describe('matched-positions-pug', async () => {
@@ -304,17 +414,17 @@ describe('matched-positions-pug', async () => {
         [
           39,
           40,
-          "[border=\\"b\\"]",
+          "[border="b"]",
         ],
         [
           41,
           46,
-          "[border=\\"gray4\\"]",
+          "[border="gray4"]",
         ],
         [
           65,
           68,
-          "[text=\\"red\\"]",
+          "[text="red"]",
         ],
       ]
     `)

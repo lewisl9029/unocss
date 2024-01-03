@@ -28,9 +28,9 @@ it('pseudo variant order', async () => {
     .toMatchInlineSnapshot(`
       "/* layer: default */
       .foo-1{text:foo-1;}
-      .hover\\\\:foo-2:hover{text:foo-2;}
-      .focus\\\\:foo-3:focus{text:foo-3;}
-      .disabled\\\\:foo-4:disabled{text:foo-4;}"
+      .hover\\:foo-2:hover{text:foo-2;}
+      .focus\\:foo-3:focus{text:foo-3;}
+      .disabled\\:foo-4:disabled{text:foo-4;}"
     `)
 
   const css2 = await uno.generate([
@@ -44,9 +44,9 @@ it('pseudo variant order', async () => {
     .toMatchInlineSnapshot(`
       "/* layer: default */
       .foo-1{text:foo-1;}
-      .hover\\\\:foo-1:hover{text:foo-1;}
-      .focus\\\\:foo-1:focus{text:foo-1;}
-      .disabled\\\\:foo-1:disabled{text:foo-1;}"
+      .hover\\:foo-1:hover{text:foo-1;}
+      .focus\\:foo-1:focus{text:foo-1;}
+      .disabled\\:foo-1:disabled{text:foo-1;}"
     `)
 })
 
@@ -77,8 +77,8 @@ it('focus-visible:', async () => {
   expect(result.css)
     .toMatchInlineSnapshot(`
       "/* layer: default */
-      .focus\\\\:foo-2:focus{text:foo-2;}
-      .focus-visible\\\\:foo-1:focus-visible{text:foo-1;}"
+      .focus\\:foo-2:focus{text:foo-2;}
+      .focus-visible\\:foo-1:focus-visible{text:foo-1;}"
     `)
 })
 
