@@ -34,6 +34,7 @@ export const variantCustomMedia: VariantObject = {
     const prefix = matcher.slice(0, separatorIndex)
     const rest = matcher.slice(separatorIndex + 1)
 
+    // @ts-expect-error fixme: types
     const breakpointRaw = ctx.theme.breakpoints?.[prefix]?.raw
     if (!breakpointRaw)
       return
