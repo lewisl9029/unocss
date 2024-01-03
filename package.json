@@ -15,7 +15,7 @@
     "docs": "npm -C docs run docs:dev",
     "inspector": "npm -C packages/inspector run dev",
     "play": "npm -C playground run dev",
-    "lint": "eslint --cache .",
+    "lint": "eslint --cache ./packages/preset-mini",
     "lint:fix": "nr lint --fix",
     "release": "bumpp -r",
     "size": "esno scripts/size.ts",
