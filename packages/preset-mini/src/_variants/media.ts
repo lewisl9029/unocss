@@ -25,6 +25,25 @@ export const variantCustomMedia: VariantObject = {
         }
       }
     }
+
+    const separatorIndex = matcher.indexOf(':')
+
+    if (separatorIndex === -1)
+      return
+
+    const prefix = matcher.slice(0, separatorIndex)
+    const rest = matcher.slice(separatorIndex + 1)
+
+    const breakpointRaw = ctx.theme.breakpoints?.[prefix]?.raw
+    if (!breakpointRaw)
+      return
+    return {
+      matcher: rest,
+      handle: (input, next) => next({
+        ...input,
+        parent: `${input.parent ? `${input.parent} $$ ` : ''}@media ${breakpointRaw}`,
+      }),
+    }
   },
   multiPass: true,
 }

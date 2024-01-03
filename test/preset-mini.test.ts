@@ -353,4 +353,33 @@ describe('preset-mini', () => {
         .text-sm{font-size:0.875rem;line-height:1.25rem;}"
       `)
   })
+
+  it('theme raw breakpoint', async () => {
+    const uno = createGenerator({
+      presets: [
+        presetMini(),
+      ],
+      theme: {
+        breakpoints: {
+          'sm': '640px',
+          'md': '768px',
+          'lg': '1024px',
+          'xl': '1280px',
+          '2xl': '1536px',
+          // @ts-expect-error fixme: types
+          'desktop': {
+            raw: '(min-height: 1px) and (min-width: 1px)',
+          },
+        },
+      },
+    })
+
+    expect((await uno.generate('desktop:block', { preflights: false })).css)
+      .toMatchInlineSnapshot(`
+        "/* layer: default */
+        @media (min-height: 1px) and (min-width: 1px){
+        .desktop\\\\:block{display:block;}
+        }"
+      `)
+  })
 })
