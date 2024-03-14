@@ -282,6 +282,11 @@ export const presetMiniTargets: string[] = [
   'bg-[position:bottom_left_10%]',
   'bg-[position:top_right_1/3]',
 
+  // arbitrary gradients
+  'bg-[linear-gradient(45deg,#0072ff,#00d2e8,#04fd8f,#70fd6c)]',
+  'bg-[conic-gradient(red,blue)]',
+  'bg-[radial-gradient(red,blue)]',
+
   // color - ring
   'ring-red2',
   'ring-red2/5',
@@ -366,8 +371,10 @@ export const presetMiniTargets: string[] = [
   'grid-cols-[1fr_2fr_100px_min-content]',
   'grid-cols-2',
   'grid-cols-[repeat(3,auto)]',
+  'cols-[repeat(3,auto)]',
   'grid-rows-[1fr_2fr_100px_min-content]',
   'grid-rows-3',
+  'rows-3',
   'grid',
   'auto-rows-min',
   'auto-rows-fr',
@@ -874,6 +881,9 @@ export const presetMiniTargets: string[] = [
   'tracking-[2/5]',
   'tracking-inherit',
   'font-tracking-1em',
+  'font-stretch-normal',
+  'font-stretch-[ultra-expanded]',
+  'font-stretch-1/2',
   'word-spacing-1',
   'word-spacing-wide',
   'word-spacing-2',
@@ -974,6 +984,9 @@ export const presetMiniTargets: string[] = [
   '[--css-variable-color:theme(colors.red.500/50%)]',
   '[--css-variable-color:theme(colors.green.500),theme(colors.blue.500)]',
   '[--css-spacing:theme(spacing.sm)]',
+  'bg-[--css-spacing,theme(spacing.sm)]',
+  'text-[theme(spacing.sm)]',
+  'c-[theme(colors.red.500/50%)]',
 
   // variants
   'active:scale-4',

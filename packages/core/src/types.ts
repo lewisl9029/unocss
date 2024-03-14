@@ -139,7 +139,7 @@ export interface Extractor {
    *
    * Return `undefined` to skip this extractor.
    */
-  extract?(ctx: ExtractorContext): Awaitable<Set<string> | CountableSet<string> | string[] | undefined | void>
+  extract?: (ctx: ExtractorContext) => Awaitable<Set<string> | CountableSet<string> | string[] | undefined | void>
 }
 
 export interface RuleMeta {
@@ -398,6 +398,11 @@ export interface ConfigBase<Theme extends object = object> {
   layers?: Record<string, number>
 
   /**
+   * Output the internal layers as CSS Cascade Layers.
+   */
+  outputToCssLayers?: boolean | OutputCssLayersOptions
+
+  /**
    * Custom function to sort layers.
    */
   sortLayers?: (layers: string[]) => string[]
@@ -462,6 +467,16 @@ export interface ConfigBase<Theme extends object = object> {
    * @default `true` when `envMode` is `dev`, otherwise `false`
    */
   details?: boolean
+}
+
+export interface OutputCssLayersOptions {
+
+  /**
+   * Specify the css layer that the internal layer should be output to.
+   *
+   * Return `null` to specify that the layer should not be output to any css layer.
+   */
+  cssLayerName?: (internalLayer: string) => string | undefined | null
 }
 
 export type AutoCompleteTemplate = string
@@ -604,7 +619,7 @@ export interface UnocssPluginContext<Config extends UserConfig = UserConfig> {
   /**
    * Await all pending tasks
    */
-  flushTasks(): Promise<any>
+  flushTasks: () => Promise<any>
 
   filter: (code: string, id: string) => boolean
   extract: (code: string, id?: string) => Promise<void>
@@ -671,7 +686,7 @@ export interface ContentOptions {
   /**
    * Inline text to be extracted
    */
-  inline?: (string | { code: string; id?: string } | (() => Awaitable<string | { code: string; id?: string }>)) []
+  inline?: (string | { code: string, id?: string } | (() => Awaitable<string | { code: string, id?: string }>)) []
 
   /**
    * Filters to determine whether to extract certain modules from the build tools' transformation pipeline.
@@ -707,7 +722,7 @@ export interface ContentOptions {
   /**
    * @deprecated Renamed to `inline`
    */
-  plain?: (string | { code: string; id?: string }) []
+  plain?: (string | { code: string, id?: string }) []
 }
 
 /**
@@ -736,7 +751,7 @@ export interface PluginOptions {
    *
    * Supported sources:
    * - `filesystem` - extract from file system
-   * - `plain` - extract from plain inline text
+   * - `inline` - extract from plain inline text
    * - `pipeline` - extract from build tools' transformation pipeline, such as Vite and Webpack
    *
    * The usage extracted from each source will be **merged** together.
@@ -789,8 +804,8 @@ RequiredByKey<UserConfig<Theme>, 'mergeSelectors' | 'theme' | 'rules' | 'variant
 export interface GenerateResult<T = Set<string>> {
   css: string
   layers: string[]
-  getLayer(name?: string): string | undefined
-  getLayers(includes?: string[], excludes?: string[]): string
+  getLayer: (name?: string) => string | undefined
+  getLayers: (includes?: string[], excludes?: string[]) => string
   matched: T
 }
 
