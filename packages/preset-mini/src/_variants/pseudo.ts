@@ -62,6 +62,7 @@ const PseudoClasses: Record<string, string> = Object.fromEntries([
   'last-of-type',
   ['last', ':last-child'],
   'only-child',
+  ['only', ':only-child'],
   'only-of-type',
 
   // pseudo elements part 2

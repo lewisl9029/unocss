@@ -19,6 +19,7 @@ it('pseudo variant order', async () => {
     'hover:foo-2',
     'focus:foo-3',
     'disabled:foo-4',
+    'only:foo-5',
   ]).then(r => r.css)
 
   expect(css.indexOf('foo-1')).toBeLessThan(css.indexOf('foo-2'))
@@ -30,7 +31,8 @@ it('pseudo variant order', async () => {
       .foo-1{text:foo-1;}
       .hover\\:foo-2:hover{text:foo-2;}
       .focus\\:foo-3:focus{text:foo-3;}
-      .disabled\\:foo-4:disabled{text:foo-4;}"
+      .disabled\\:foo-4:disabled{text:foo-4;}
+      .only\\:foo-5:only-child{text:foo-5;}"
     `)
 
   const css2 = await uno.generate([
