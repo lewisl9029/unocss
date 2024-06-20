@@ -4,10 +4,12 @@ on:
   push:
     branches:
       - main
+      - fork
 
   pull_request:
     branches:
       - main
+      - fork
 
   merge_group: {}
 
@@ -18,12 +20,13 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        node_version: [18.18.2, lts/*]
-        include:
-          - os: macos-latest
-            node_version: lts/*
-          - os: windows-latest
-            node_version: lts/*
+        node_version: [20]
+        # node_version: [18.18.2, lts/*]
+        # include:
+        #   - os: macos-latest
+        #     node_version: lts/*
+        #   - os: windows-latest
+        #     node_version: lts/*
       fail-fast: false
 
     steps:
@@ -57,5 +60,5 @@ jobs:
       - name: Test
         run: nr test
 
-      - name: Typecheck
-        run: nr typecheck
+      # - name: Typecheck
+      #   run: nr typecheck

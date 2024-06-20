@@ -285,6 +285,7 @@ export function resolveBreakpoints({ theme, generator }: Readonly<VariantContext
     return resolvedBreakpoints.get(theme)
 
   const resolved = Object.entries(breakpoints)
+    .filter(([_point, size]) => typeof size === 'string')
     .sort((a, b) => Number.parseInt(a[1].replace(reLetters, '')) - Number.parseInt(b[1].replace(reLetters, '')))
     .map(([point, size]) => ({ point, size }))
 

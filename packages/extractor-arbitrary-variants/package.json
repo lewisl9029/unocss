@@ -9,7 +9,7 @@
   "homepage": "https://github.com/unocss/unocss/tree/main/packages/extractor-arbitrary-variants#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/unocss/unocss",
+    "url": "https://github.com/lewisl9029/unocss",
     "directory": "packages/extractor-arbitrary-variants"
   },
   "bugs": {

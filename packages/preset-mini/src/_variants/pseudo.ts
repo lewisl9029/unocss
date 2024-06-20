@@ -1,4 +1,4 @@
-import type { VariantObject } from '@unocss/core'
+import type { CSSEntries, VariantObject } from '@unocss/core'
 import { escapeRegExp, escapeSelector, warnOnce } from '@unocss/core'
 import type { PresetMiniOptions } from '..'
 import { getBracket, h, variantGetBracket } from '../_utils'
@@ -62,6 +62,7 @@ const PseudoClasses: Record<string, string> = Object.fromEntries([
   'last-of-type',
   ['last', ':last-child'],
   'only-child',
+  ['only', ':only-child'],
   'only-of-type',
 
   // pseudo elements part 2
@@ -248,9 +249,14 @@ export function variantPseudoClassesAndElements(): VariantObject {
                   selector: `${input.selector}${pseudo}`,
                 }
 
+            const entries: CSSEntries = { '::before': true, '::after': true }[pseudo]
+              ? Object.entries(Object.fromEntries([['content', '""'], ...input.entries]))
+              : input.entries
+
             return next({
               ...input,
               ...selectors,
+              entries,
               sort: index,
               noMerge: true,
             })
