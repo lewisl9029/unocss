@@ -353,8 +353,8 @@ unocss .scope-\[unocss\]\:block{display:block;}
 .content-\[string\:attr\(dashed-attr\)\]{content:attr(dashed-attr);}
 .content-\[string\:attr\(underlined\\_attr\)\]{content:attr(underlined_attr);}
 .content-\$unocss-var{content:var(--unocss-var);}
-.before\:\[\&\[data-active\=\'true\'\]\]\:content-\[\'test\'\][data-active='true']::before{content:"";content:'test';}
-.after\:content-\[quoted\:unocss\]::after{content:"";content:"unocss";}
+.before\:\[\&\[data-active\=\'true\'\]\]\:content-\[\'test\'\][data-active='true']::before{content:'test';}
+.after\:content-\[quoted\:unocss\]::after{content:"unocss";}
 .content-empty{content:"";}
 .content-none{content:none;}
 .text-\[100px\]{font-size:100px;}

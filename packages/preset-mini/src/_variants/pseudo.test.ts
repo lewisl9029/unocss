@@ -113,7 +113,7 @@ it('before: and after: includes empty content for tailwind compat', async () => 
   expect(result.css)
     .toMatchInlineSnapshot(`
       "/* layer: default */
-      .before\\:content-none::before{content:"";content:none;}
+      .before\\:content-none::before{content:none;}
       .before\\:foo-1::before{content:"";text:foo-1;}
       .after\\:foo-1::after{content:"";text:foo-1;}"
     `)

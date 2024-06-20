@@ -249,7 +249,7 @@ export function variantPseudoClassesAndElements(): VariantObject {
                 }
 
             const entries: CSSEntries = { '::before': true, '::after': true }[pseudo]
-              ? [['content', '""'], ...input.entries]
+              ? Object.entries(Object.fromEntries([['content', '""'], ...input.entries]))
               : input.entries
 
             return next({
