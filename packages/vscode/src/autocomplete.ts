@@ -121,6 +121,9 @@ export async function registerAutoComplete(
 
         const result = await autoComplete.suggestInFile(code, doc.offsetAt(position))
 
+        if (!result)
+          return
+
         // log.appendLine(`🤖 ${id} | ${result.suggestions.slice(0, 10).map(v => `[${v[0]}, ${v[1]}]`).join(', ')}`)
 
         if (!result.suggestions.length)
@@ -129,9 +132,9 @@ export async function registerAutoComplete(
         const completionItems: UnoCompletionItem[] = []
 
         const suggestions = result.suggestions.slice(0, configuration.maxItems)
-
+        const isAttributify = ctx.uno.config.presets.some(p => p.name === '@unocss/preset-attributify')
         for (const [value, label] of suggestions) {
-          const css = await getCSS(ctx!.uno, value)
+          const css = await getCSS(ctx!.uno, isAttributify ? [value, `[${value}=""]`] : value)
           const colorString = getColorString(css)
           const itemKind = colorString ? CompletionItemKind.Color : CompletionItemKind.EnumMember
           const item = new UnoCompletionItem(label, itemKind, value, ctx!.uno)

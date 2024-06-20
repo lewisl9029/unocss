@@ -1,6 +1,6 @@
 import { escapeSelector } from '@unocss/core'
 import { globalKeywords } from '../mappings'
-import { bracketTypeRe, numberRE, numberWithUnitRE, unitOnlyRE } from './regex'
+import { bracketTypeRe, numberRE, numberWithUnitRE, unitOnlyMap, unitOnlyRE } from './regex'
 
 // Not all, but covers most high frequency attributes
 const cssProps = [
@@ -65,7 +65,7 @@ const cssProps = [
 ]
 
 function round(n: number) {
-  return n.toFixed(10).replace(/\.0+$/, '').replace(/(\.\d+?)0+$/, '$1')
+  return +n.toFixed(10)
 }
 
 export function numberWithUnit(str: string) {
@@ -84,8 +84,10 @@ export function auto(str: string) {
 }
 
 export function rem(str: string) {
+  if (!str)
+    return
   if (unitOnlyRE.test(str))
-    return `1${str}`
+    return `${unitOnlyMap[str]}${str}`
   const match = str.match(numberWithUnitRE)
   if (!match)
     return
@@ -100,7 +102,7 @@ export function rem(str: string) {
 
 export function px(str: string) {
   if (unitOnlyRE.test(str))
-    return `1${str}`
+    return `${unitOnlyMap[str]}${str}`
   const match = str.match(numberWithUnitRE)
   if (!match)
     return
@@ -129,6 +131,8 @@ export function percent(str: string) {
 }
 
 export function fraction(str: string) {
+  if (!str)
+    return
   if (str === 'full')
     return '100%'
   const [left, right] = str.split('/')
@@ -202,7 +206,7 @@ function bracketWithType(str: string, requiredType?: string) {
             vars.push(g1)
             return match.replace(g1, '--un-calc')
           })
-          .replace(/(-?\d*\.?\d(?!\b-\d.+[,)](?![^+\-/*])\D)(?:%|[a-z]+)?|\))([+\-/*])/g, '$1 $2 ')
+          .replace(/(-?\d*\.?\d(?!-\d.+[,)](?![^+\-/*])\D)(?:%|[a-z]+)?|\))([+\-/*])/g, '$1 $2 ')
           .replace(/--un-calc/g, () => vars.shift()!)
       })
   }
