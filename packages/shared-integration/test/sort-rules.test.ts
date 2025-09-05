@@ -33,4 +33,15 @@ describe('sort rules', () => {
     expect(await sort('hover:(pt-2 p-4) hover:text-red hover:focus:(m1 mx2) foo'))
       .toMatchInlineSnapshot('"foo hover:(p-4 pt-2 text-red) hover:focus:(m1 mx2)"')
   })
+
+  it('custom theme sizes sort before default ones', async () => {
+    const uno = createGenerator({
+      presets: [presetUno()],
+      theme: { height: { 'btn-md': '2rem' }, width: { 'btn-md': '2rem' } },
+    })
+    expect(await sortRules('h-full h-sm h-btn-md', uno))
+      .toBe('h-btn-md h-full h-sm')
+    expect(await sortRules('w-full w-sm w-btn-md', uno))
+      .toBe('w-btn-md w-full w-sm')
+  })
 })
