@@ -15,26 +15,50 @@ function getPropName(minmax: string, hw: string) {
 
 type SizeProps = 'width' | 'height' | 'maxWidth' | 'maxHeight' | 'minWidth' | 'minHeight' | 'inlineSize' | 'blockSize' | 'maxInlineSize' | 'maxBlockSize' | 'minInlineSize' | 'minBlockSize'
 
-function getSizeValue(minmax: string, hw: string, theme: Theme, prop: string) {
+function getSizeValue(minmax: string, hw: string, theme: Theme, prop: string, defaultTheme?: Theme): [string | number | undefined, number] {
   const str = getPropName(minmax, hw).replace(/-(\w)/g, (_, p) => p.toUpperCase()) as SizeProps
-  const v = theme[str]?.[prop]
+  const group = theme[str as keyof Theme] as any
+  const defaultGroup = (defaultTheme as any)?.[str]
+  const v = group?.[prop]
   if (v != null)
-    return v
+    return [v, defaultGroup?.[prop] == null ? -1 : 0]
 
   switch (prop) {
     case 'fit':
     case 'max':
     case 'min':
-      return `${prop}-content`
+      return [`${prop}-content`, 0]
   }
 
-  return h.bracket.cssvar.global.auto.fraction.rem(prop)
+  return [h.bracket.cssvar.global.auto.fraction.rem(prop), 0]
 }
 
 export const sizes: Rule<Theme>[] = [
-  [/^size-(min-|max-)?(.+)$/, ([, m, s], { theme }) => ({ [getPropName(m, 'w')]: getSizeValue(m, 'w', theme, s), [getPropName(m, 'h')]: getSizeValue(m, 'h', theme, s) })],
-  [/^(?:size-)?(min-|max-)?([wh])-?(.+)$/, ([, m, w, s], { theme }) => ({ [getPropName(m, w)]: getSizeValue(m, w, theme, s) })],
-  [/^(?:size-)?(min-|max-)?(block|inline)-(.+)$/, ([, m, w, s], { theme }) => ({ [getPropName(m, w)]: getSizeValue(m, w, theme, s) }), {
+  [/^size-(min-|max-)?(.+)$/, ([, m, s], ctx) => {
+    const d = ctx.generator.defaults.theme as Theme | undefined
+    const [wv, ws] = getSizeValue(m, 'w', ctx.theme, s, d)
+    const [hv, hs] = getSizeValue(m, 'h', ctx.theme, s, d)
+    return [
+      { [getPropName(m, 'w')]: wv, [getPropName(m, 'h')]: hv },
+      { sort: Math.min(ws, hs) },
+    ]
+  }],
+  [/^(?:size-)?(min-|max-)?([wh])-?(.+)$/, ([, m, w, s], ctx) => {
+    const d = ctx.generator.defaults.theme as Theme | undefined
+    const [v, sort] = getSizeValue(m, w, ctx.theme, s, d)
+    return [
+      { [getPropName(m, w)]: v },
+      { sort },
+    ]
+  }],
+  [/^(?:size-)?(min-|max-)?(block|inline)-(.+)$/, ([, m, w, s], ctx) => {
+    const d = ctx.generator.defaults.theme as Theme | undefined
+    const [v, sort] = getSizeValue(m, w, ctx.theme, s, d)
+    return [
+      { [getPropName(m, w)]: v },
+      { sort },
+    ]
+  }, {
     autocomplete: [
       '(w|h)-$width|height|maxWidth|maxHeight|minWidth|minHeight|inlineSize|blockSize|maxInlineSize|maxBlockSize|minInlineSize|minBlockSize',
       '(block|inline)-$width|height|maxWidth|maxHeight|minWidth|minHeight|inlineSize|blockSize|maxInlineSize|maxBlockSize|minInlineSize|minBlockSize',
